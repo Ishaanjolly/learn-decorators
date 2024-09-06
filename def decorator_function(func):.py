@@ -1,4 +1,6 @@
 
+import time
+
 def decorator_name(func):
     """
     Basic decorator structure thanks to Chat GPT
@@ -38,12 +40,49 @@ def error_catcher(func):
 
 
 def repeat(num_times): 
+    """
+    repeats an output multiple times
+    
+    """
     def decorator(func): 
         def wrapper(): 
             for _ in range(num_times): 
                 result = func(*args, **kwargs)
             return result 
         return wrapper 
+    return decorator
+
+
+
+def wait_decorator(seconds):
+    """
+    waiting
+    """
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            print(f"Waiting for {seconds} seconds before calling {func.__name__}...")
+            time.sleep(seconds)  # Wait for the specified amount of time
+            result = func(*args, **kwargs)  # Call the original function
+            return result
+        return wrapper
+    return decorator
+
+
+def retry_decorator(max_retries=3, wait_time=2):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            retries = 0
+            while retries < max_retries:
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    retries += 1
+                    print(f"Attempt {retries} failed: {e}")
+                    if retries < max_retries:
+                        print(f"Retrying in {wait_time} seconds...")
+                        time.sleep(wait_time)
+            raise Exception(f"Failed after {max_retries} retries.")
+        return wrapper
     return decorator
 
 
@@ -58,9 +97,3 @@ class CountCalls:
         return self.func(*args, **kwargs)
 
   
-
-# @decorator_function
-# def say_hello():
-#     print("Hello!")
-
-# say_hello()
